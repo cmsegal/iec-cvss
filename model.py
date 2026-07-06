@@ -36,11 +36,10 @@ class State:
         )
 
     def cap_with(self, other: "State") -> "State":
-        """Computes the componentwise minimum of this state and the given state.
+        """Computes the componentwise minimum of this state and `other`.
 
-        This is used to compute the maximum reportable achieved level (s_bar),
-        defined in the Appendix as the minimum of the target and capability levels
-        (min(s^T_{z,f}, s^C_{z,f})).
+        This is used to compute s_bar_{z,f} = min(s^T_{z,f}, s^C_{z,f}) -- the
+        reporting cap on achieved level from Appendix A.
         """
         capped: Dict[str, Dict[FR, int]] = {}
         for zone, levels in self.levels.items():
@@ -56,19 +55,19 @@ class State:
 # CVSS
 # ----------------------------
 
-class MAV(Enum):
+class MAV(Enum): # Modified Attack Vector
     NETWORK = "N"
     ADJACENT = "A"
     LOCAL = "L"
 
 
-class MPR(Enum):
+class MPR(Enum): # Modified Privileges Required
     NONE = "N"
     LOW = "L"
     HIGH = "H"
 
 
-class Requirement(Enum):
+class Requirement(Enum): # C, I and A requirements
     LOW = "L"
     MEDIUM = "M"
     HIGH = "H"
@@ -87,7 +86,7 @@ class CVSSVector:
 
 
 # ----------------------------
-# Vulnerability evidence
+# Vulnerability evidence (part of kappa, the configuration context referred to by the paper)
 # ----------------------------
 
 @dataclass

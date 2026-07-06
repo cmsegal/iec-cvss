@@ -95,6 +95,8 @@ def F(
 ) -> State:
 
     # s_bar_{z,f} = min(s^T_{z,f}, s^C_{z,f}) -- the reporting cap.
+    # The achieved level should not exceed what's supported
+    # (capability) or what's required (target).
     cap = target.cap_with(capability)
 
     # P_{z,f} = min(4, max_c D_{c,z} M_{c,f} q(v_c))
