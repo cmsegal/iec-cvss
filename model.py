@@ -82,7 +82,7 @@ class CVSSVector:
     ir: Requirement
     ar: Requirement
 
-    score: float  # E(v_c): the *environmental* score, recomputed by G each iteration
+    env_score: float  # E(v_c): the environmental score, recomputed by G each iteration
 
 
 # ----------------------------

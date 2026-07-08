@@ -63,7 +63,7 @@ if __name__ == "__main__":
         b = triple(state, "Boundary")
         p = triple(state, "PlantBus")
         u = triple(state, "PackageUnit")
-        scores = tuple(round(vecs[v].score, 2) for v in ("V1", "V2", "V3"))
+        scores = tuple(round(vecs[v].env_score, 2) for v in ("V1", "V2", "V3"))
         print(f"{i:<5}{str(b):<14}{str(p):<14}{str(u):<14}  {scores}")
 
     print("\nExpected from Table 8 (RDF, RA, SI triples):")

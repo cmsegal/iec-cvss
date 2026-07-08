@@ -1,26 +1,29 @@
 from model import MAV, MPR, Requirement, State, Vulnerability, CVSSVector, FR
 
 
-def alpha(rdf_level: int) -> MAV:
-    if rdf_level <= 1:
+def attack_vector_from_level(level: int) -> MAV:
+    """Computes CVSS MAV metric from the given IEC level."""
+    if level <= 1:
         return MAV.NETWORK
-    if rdf_level == 2:
+    if level == 2:
         return MAV.ADJACENT
     return MAV.LOCAL
 
 
-def pi(iac_uc_level: int) -> MPR:
-    if iac_uc_level <= 1:
+def privileges_required_from_level(level: int) -> MPR:
+    """Computes CVSS MPR metric from the given IEC level."""
+    if level <= 1:
         return MPR.NONE
-    if iac_uc_level == 2:
+    if level == 2:
         return MPR.LOW
     return MPR.HIGH
 
 
-def eta(target_level: int) -> Requirement:
-    if target_level <= 1:
+def cia_requirement_from_level(level: int) -> Requirement:
+    """Computes CVSS impact requirement (CR, IR or AR) metric from the given IEC level."""
+    if level <= 1:
         return Requirement.LOW
-    if target_level == 2:
+    if level == 2:
         return Requirement.MEDIUM
     return Requirement.HIGH
 
@@ -62,25 +65,25 @@ def G(
     vectors = {}
 
     for v in vulnerabilities:
-        # r_c(s) = min over the upstream path Pi(c) of achieved RDF.
+        # MinRDF_c(s) = minimum value of achieved RDF over the upstream path Upstream(c).
         path = v.upstream_path or [v.zone]
-        rdf = min(achieved.level(z, FR.RDF) for z in path)
+        min_rdf = min(achieved.level(z, FR.RDF) for z in path)
 
-        # a_c(s) is local by definition (Appendix A.3).
-        iac_uc = min(
+        # LocalAC_c(s) = minimum among the local zone's IAC and UC (Appendix A.3).
+        local_ac = min(
             achieved.level(v.zone, FR.IAC),
             achieved.level(v.zone, FR.UC),
         )
 
         vector = CVSSVector(
-            mav=alpha(rdf),
-            mpr=pi(iac_uc),
-            cr=eta(target.level(v.zone, FR.DC)),
-            ir=eta(target.level(v.zone, FR.SI)),
-            ar=eta(target.level(v.zone, FR.RA)),
-            score=0.0,
+            mav=attack_vector_from_level(min_rdf),
+            mpr=privileges_required_from_level(local_ac),
+            cr=cia_requirement_from_level(target.level(v.zone, FR.DC)),
+            ir=cia_requirement_from_level(target.level(v.zone, FR.SI)),
+            ar=cia_requirement_from_level(target.level(v.zone, FR.RA)),
+            env_score=0.0,
         )
-        vector.score = environmental_score(v.base_score, vector)
+        vector.env_score = environmental_score(v.base_score, vector)
 
         vectors[v.id] = vector
 
@@ -102,7 +105,7 @@ def F(
     # P_{z,f} = min(4, max_c D_{c,z} M_{c,f} q(v_c))
     penalties: dict[tuple[str, FR], int] = {}
     for v in vulnerabilities:
-        p = q(vectors[v.id].score)
+        p = q(vectors[v.id].env_score)
         for zone in v.propagated_to:
             for fr in v.affected_frs:
                 key = (zone, fr)
@@ -121,8 +124,8 @@ def _vectors_equal(a: dict, b: dict) -> bool:
     if a.keys() != b.keys():
         return False
     return all(
-        (a[k].mav, a[k].mpr, a[k].cr, a[k].ir, a[k].ar, round(a[k].score, 6))
-        == (b[k].mav, b[k].mpr, b[k].cr, b[k].ir, b[k].ar, round(b[k].score, 6))
+        (a[k].mav, a[k].mpr, a[k].cr, a[k].ir, a[k].ar, round(a[k].env_score, 6))
+        == (b[k].mav, b[k].mpr, b[k].cr, b[k].ir, b[k].ar, round(b[k].env_score, 6))
         for k in a
     )
 
