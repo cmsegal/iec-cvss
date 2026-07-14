@@ -93,11 +93,7 @@ class CVSSVector:
 class Vulnerability:
     id: str
     zone: str                # z(c): zone of the vulnerable asset
-    base_score: float        # v^B: vendor/base CVSS score -- fixed, never mutated
-    affected_frs: Set[FR]    # M_{c,.}: which FRs are affected by this vulnerability
-    propagated_to: Set[str]  # D_{c,.}: zones whose achieved level this can downgrade
-    upstream_path: List[str]  # Pi(c): zones from the nearest untrusted entry
-    # point to z(c), inclusive of z(c) itself. Used by G to compute
-    # r_c(s) = min_{z in Pi(c)} s_{z,RDF} -- the mechanism that lets an
-    # upstream boundary failure raise the environmental severity of a
-    # *downstream* vulnerability.
+    base_cvss_str: str       # vendor/base CVSS string -- fixed, never mutated
+    affected_frs: Set[FR]
+    propagated_to: Set[str]
+    upstream_path: List[str]

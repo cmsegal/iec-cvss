@@ -1,3 +1,4 @@
+from cvss import CVSS3
 from model import MAV, MPR, Requirement, State, Vulnerability, CVSSVector, FR
 
 
@@ -30,7 +31,7 @@ def cia_requirement_from_level(level: int) -> Requirement:
 
 def q(score: float) -> int:
     """Discrete penalty classes based on the Appendix."""
-    if score >= 9.0:
+    if score >= 8.0:
         return 2
     if score >= 4.0:
         return 1
@@ -38,22 +39,31 @@ def q(score: float) -> int:
 
 
 # ---------------------------------------------------------------------------------------------------
-# Environmental score computation (just an example; this should be replaced with a real CVSS scorer)
+# CVSS 3.1 environmental score computation
 # ---------------------------------------------------------------------------------------------------
 
-_MAV_BONUS = {MAV.LOCAL: 0.0, MAV.ADJACENT: 1.0, MAV.NETWORK: 2.0}
-_MPR_BONUS = {MPR.HIGH: 0.0, MPR.LOW: 0.75, MPR.NONE: 1.5}
-_REQ_BONUS = {Requirement.LOW: 0.0, Requirement.MEDIUM: 0.25, Requirement.HIGH: 0.5}
-
-
-def environmental_score(base_score: float, vector: CVSSVector) -> float:
-    """Note: this should be replaced by a real CVSS scoring function."""
-    bonus = (
-        _MAV_BONUS[vector.mav]
-        + _MPR_BONUS[vector.mpr]
-        + max(_REQ_BONUS[vector.cr], _REQ_BONUS[vector.ir], _REQ_BONUS[vector.ar])
-    )
-    return min(10.0, base_score + bonus)
+def environmental_score_cvss31(base_vector_str: str, vector: CVSSVector) -> float:
+    """
+    Computes the CVSS v3.1 Environmental Score.
+    
+    :param base_vector_str: The vendor-provided CVSS 3.1 base vector.
+                            e.g., "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+    :param vector: Environmental CVSS vector containing modified scores (MAV, MPR, CR, IR, AR)
+    """
+    # 1. Parse the original base vector
+    cvss_obj = CVSS3(base_vector_str)
+    
+    # 2. Overwrite the environmental metrics using the values supplied by G
+    # CVSS3 expects metrics to be in their standard short form (e.g., MAV: "N", "A", "L")
+    cvss_obj.metrics['MAV'] = vector.mav.value  # "N", "A", or "L"
+    cvss_obj.metrics['MPR'] = vector.mpr.value  # "N", "L", or "H"
+    cvss_obj.metrics['CR']  = vector.cr.value   # "L", "M", or "H"
+    cvss_obj.metrics['IR']  = vector.ir.value   # "L", "M", or "H"
+    cvss_obj.metrics['AR']  = vector.ar.value   # "L", "M", or "H"
+    
+    # 3. Recalculate and return environmental score
+    cvss_obj.compute_environmental_score()
+    return cvss_obj.environmental_score
 
 
 def G(
@@ -83,7 +93,7 @@ def G(
             ar=cia_requirement_from_level(target.level(v.zone, FR.RA)),
             env_score=0.0,
         )
-        vector.env_score = environmental_score(v.base_score, vector)
+        vector.env_score = environmental_score_cvss31(v.base_cvss_str, vector)
 
         vectors[v.id] = vector
 
