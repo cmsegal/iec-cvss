@@ -8,9 +8,7 @@ from alg import alg
 
 ZONES = ["Boundary", "TerminalBus", "PlantBus", "PackageUnit"]
 
-# Table 6: manual-derived / target cap s_bar per zone (IAC, UC, SI, RDF, RA).
-# DC is not in Table 6 -- assumed here, loosely following Table 3's pattern
-# (DC matters most near the DMZ/boundary, less inside process zones).
+# Table 6: manual-derived / target cap s_bar per zone (IAC, UC, SI, RDF, RA, DC).
 _TABLE_6 = {
     "Boundary":    {FR.IAC: 3, FR.UC: 3, FR.SI: 3, FR.RDF: 3, FR.RA: 2, FR.DC: 3},
     "TerminalBus": {FR.IAC: 2, FR.UC: 2, FR.SI: 3, FR.RDF: 2, FR.RA: 3, FR.DC: 2},
@@ -26,7 +24,7 @@ vulnerabilities = [
     Vulnerability(
         id="V1",
         zone="Boundary",
-        base_score=9.0,
+        base_cvss_str="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
         affected_frs={FR.RDF, FR.RA},
         propagated_to={"Boundary", "PlantBus", "PackageUnit"},
         upstream_path=["Boundary"],
@@ -34,7 +32,7 @@ vulnerabilities = [
     Vulnerability(
         id="V2",
         zone="TerminalBus",
-        base_score=3.95,
+        base_cvss_str="CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:L",
         affected_frs={FR.IAC, FR.UC, FR.SI},
         propagated_to={"TerminalBus"},
         upstream_path=["Boundary", "TerminalBus"],
@@ -42,7 +40,7 @@ vulnerabilities = [
     Vulnerability(
         id="V3",
         zone="PackageUnit",
-        base_score=5.85,
+        base_cvss_str="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
         affected_frs={FR.SI, FR.RA},
         propagated_to={"PackageUnit"},
         upstream_path=["Boundary", "PlantBus", "PackageUnit"],
