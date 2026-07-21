@@ -1,5 +1,5 @@
 """
-Reproduces the blueprint case study in Appendix B (Tables 6-8).
+Reproduces the blueprint case study.
 """
 
 from model import FR, State, Vulnerability
@@ -8,18 +8,18 @@ from alg import alg
 
 ZONES = ["Boundary", "TerminalBus", "PlantBus", "PackageUnit"]
 
-# Table 6: manual-derived / target cap s_bar per zone (IAC, UC, SI, RDF, RA, DC).
-_TABLE_6 = {
+# Manual-derived / target cap s_bar per zone (IAC, UC, SI, RDF, RA, DC).
+_TARGET = {
     "Boundary":    {FR.IAC: 3, FR.UC: 3, FR.SI: 3, FR.RDF: 3, FR.RA: 2, FR.DC: 3},
     "TerminalBus": {FR.IAC: 2, FR.UC: 2, FR.SI: 3, FR.RDF: 2, FR.RA: 3, FR.DC: 2},
     "PlantBus":    {FR.IAC: 2, FR.UC: 2, FR.SI: 3, FR.RDF: 3, FR.RA: 4, FR.DC: 1},
     "PackageUnit": {FR.IAC: 2, FR.UC: 2, FR.SI: 3, FR.RDF: 3, FR.RA: 3, FR.DC: 1},
 }
 
-target = State({z: dict(levels) for z, levels in _TABLE_6.items()})
-capability = State({z: dict(levels) for z, levels in _TABLE_6.items()})
+target = State({z: dict(levels) for z, levels in _TARGET.items()})
+capability = State({z: dict(levels) for z, levels in _TARGET.items()})
 
-# Table 7: vulnerability evidence.
+# Vulnerability evidence.
 vulnerabilities = [
     Vulnerability(
         id="V1",

@@ -29,8 +29,8 @@ def cia_requirement_from_level(level: int) -> Requirement:
     return Requirement.HIGH
 
 
-def q(score: float) -> int:
-    """Discrete penalty classes based on the Appendix."""
+def P(score: float) -> int:
+    """Maps the CVSS environmental score into discrete penalty classes."""
     if score >= 8.0:
         return 2
     if score >= 4.0:
@@ -112,10 +112,10 @@ def F(
     # (capability) or what's required (target).
     cap = target.cap_with(capability)
 
-    # P_{z,f} = min(4, max_c D_{c,z} M_{c,f} q(v_c))
+    # ZP_{z,f} = min(4, max_{c in C_{active}} P(v_c))
     penalties: dict[tuple[str, FR], int] = {}
     for v in vulnerabilities:
-        p = q(vectors[v.id].env_score)
+        p = P(vectors[v.id].env_score)
         for zone in v.propagated_to:
             for fr in v.affected_frs:
                 key = (zone, fr)
