@@ -63,8 +63,3 @@ if __name__ == "__main__":
         u = triple(state, "PackageUnit")
         scores = tuple(round(vecs[v].env_score, 2) for v in ("V1", "V2", "V3"))
         print(f"{i:<5}{str(b):<14}{str(p):<14}{str(u):<14}  {scores}")
-
-    print("\nExpected from Table 8 (RDF, RA, SI triples):")
-    print("  1: Boundary (1,0,3); PlantBus (1,2,3); PackageUnit (1,1,2)")
-    print("  2: Boundary (1,0,3); PlantBus (1,2,3); PackageUnit (1,1,1)")
-    print("  3: stable (fixed point)")
